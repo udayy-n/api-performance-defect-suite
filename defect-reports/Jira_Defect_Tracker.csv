@@ -1,0 +1,6 @@
+Defect_ID,Summary,Module,Severity,Priority,Status,Environment,Expected_Result,Actual_Result
+BUG-101,POST /orders accepts negative price and zero quantity,Order API,High,P1,Open,QA Staging,Return 422 Unprocessable Entity,Returns 201 Created with negative price
+BUG-102,PUT /posts/{id} returns 500 on non-existent ID,Order API,High,P2,Open,QA Staging,Return 404 Not Found,Returns 500 Internal Server Error
+BUG-103,Missing X-RateLimit headers on public endpoints,API Gateway,Low,P3,Open,QA Staging,Include X-RateLimit-Remaining header,Rate limit headers omitted
+BUG-104,POST /auth/token breaches 2000ms SLA under 100 concurrent users,Auth Service,Critical,P1,In Progress,Perf Staging,95th percentile < 2000ms and <1% error,95th percentile 3420ms and 4.2% HTTP 503 errors
+BUG-105,DELETE /posts/{id} returns 200 OK for non-existent ID,Order API,Medium,P2,Open,QA Staging,Return 404 Not Found,Returns 200 OK with empty JSON object

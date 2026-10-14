@@ -1,0 +1,352 @@
+{
+  "info": {
+    "name": "REST API Functional & Regression Smoke Suite",
+    "_postman_id": "d8f12a34-5678-4bcd-9ef0-112233445566",
+    "description": "Automated Postman Collection with JavaScript assertions for functional and regression smoke testing, executable via Newman CLI.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. GET All Orders - Smoke & Header Validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC01: Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('TC02: Response time is under 2000ms SLA', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});",
+              "pm.test('TC03: Content-Type header is application/json', function () {",
+              "    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "pm.test('TC04: Response array contains 100 order records', function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    pm.expect(jsonData.length).to.eql(100);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/posts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "02. GET Single Order by ID - Payload & Schema Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC05: Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('TC06: Order payload has required schema keys and types', function () {",
+              "    var data = pm.response.json();",
+              "    pm.expect(data).to.include.all.keys('userId', 'id', 'title', 'body');",
+              "    pm.expect(data.id).to.eql(1);",
+              "    pm.expect(data.userId).to.be.a('number');",
+              "    pm.expect(data.title).to.be.a('string').and.not.empty;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/posts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "03. POST Create New Order - Functional Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC07: Status code is 201 Created', function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "pm.test('TC08: Created resource returns new ID and echoes payload', function () {",
+              "    var data = pm.response.json();",
+              "    pm.expect(data.id).to.not.be.null;",
+              "    pm.expect(data.userId).to.eql(101);",
+              "    pm.expect(data.title).to.eql('Wireless Gaming Headset Order');",
+              "});",
+              "pm.test('TC09: Response time under 2500ms', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2500);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 101,\n  \"title\": \"Wireless Gaming Headset Order\",\n  \"body\": \"Priority Courier Delivery - Hyderabad\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posts",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "04. PUT Update Full Order - Regression Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC10: Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('TC11: Updated title and body match PUT request', function () {",
+              "    var data = pm.response.json();",
+              "    pm.expect(data.id).to.eql(1);",
+              "    pm.expect(data.title).to.eql('Updated Order #101 - Confirmed');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"title\": \"Updated Order #101 - Confirmed\",\n  \"body\": \"Updated warehouse dispatch status\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "05. PATCH Partial Order Status Update",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC12: Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('TC13: Patched title field is updated', function () {",
+              "    var data = pm.response.json();",
+              "    pm.expect(data.title).to.eql('Order Status: SHIPPED');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Order Status: SHIPPED\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/posts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "06. DELETE Order by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC14: Status code is 200 OK on DELETE', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{authToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/posts/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "07. GET Customer Profiles - Data Validation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC15: Status code is 200 OK', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('TC16: Customer email format is valid', function () {",
+              "    var users = pm.response.json();",
+              "    pm.expect(users.length).to.eql(10);",
+              "    pm.expect(users[0].email).to.include('@');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "08. Negative Test - GET Non-Existent Order ID Returns 404",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('TC17: Non-existent resource returns 404 Not Found', function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/posts/999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "posts",
+            "999999"
+          ]
+        }
+      }
+    }
+  ]
+}
